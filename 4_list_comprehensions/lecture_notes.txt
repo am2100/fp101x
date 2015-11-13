@@ -1,0 +1,67 @@
+List Comprehensions
+-------------------
+Code to manipulate collections
+
+A list gives you the bear minimum to deal with a set of values.
+
+Sets are the purest form of collection type.
+
+In mathematics, the comprenehsion notation can be used to construct new sets
+from old sets.
+
+[x^2 | x <- [1..5]]
+
+In Haskell, a similar comprehension notation can be used to construct new
+lists from old lists.
+
+x <- [1..5] is a generator. It generates values for x.
+
+Comprehensions can have multiple generators, seperated by commas:
+
+> [(x,y) | x <- [1,2,3], y <- [4,5]]
+[(1,4),(1,5),(2,4),(2,5),(3,4),(3,5)]
+
+Multiple generators are like nested loops, with later generators as more
+deeply nested loops whoose variables change value more frequently.
+
+Changing the order of the generators changes the order of the elements in the
+final list:
+
+> [(x,y) | y <- [4,5], x <- [1,2,3]]
+[(1,4),(2,4),(3,4),(1,5),(2,5),(3,5)]
+
+Interestingly, SQL is built on list comprehensions.
+
+Dependant Generators
+--------------------
+Later generators can depend on the variables that are introduced by earlier
+generators:
+
+> [(x,y) | x <- [1..3], y <- [x..3]]
+[(1,1),(1,2),(1,3),(2,2),(2,3),(3,3)]
+
+This is the same as an inner loop using a variable from an outer loop.
+
+Using a dependant generator we can define the library function that
+concatenates a list of lists:
+
+concat :: [[a]] -> [a]
+concat xss = [x | xs <- xss, x <- xs]
+
+Give me every list from the list of lists
+Give me every element from the list.
+
+> concat [[1,2,3],[4,5]]
+[1,2,3,4,5]
+
+Guards
+------
+List comprehensions can use guards to restrict the values produced by earlier
+generators.
+
+> [x | x <- [1..10], even x]
+[2,4,6,8,10]
+
+In SQL this is SELECT WHERE.
+
+
