@@ -64,4 +64,74 @@ generators.
 
 In SQL this is SELECT WHERE.
 
+The Zip Function
+----------------
 
+zip :: [a] -> [b] -> [(a,b)]
+
+> zip ['a','b','c'] [1,2,3,4]
+[('a',1),('b',2),('c',3)]
+
+Using zip we can define a function that returns the list of all pairs of
+adjacent elements from a list:
+
+pairs :: [a] -> [(a,a)]
+
+pairs xs = zip xs (tail xs)
+
+> pairs [1,2,3,4]
+[(1,2),(2,3),(3,4)]
+
+Using pairs we can define a function that decides if the elements in a list
+are sorted:
+
+sorted :: Ord a => [a] -> Bool
+
+sorted xs = and [x <= y | (x,y) <- pairs xs]
+
+> sorted [1,2,3,4]
+True
+
+> sorted [1,3,2,4]
+False
+
+Using zip we can define a function that returns the list of all positions of a
+value in a list:
+
+positions :: Eq a => a -> [a] -> [Int]
+
+positions x xs = [i | (x',i) <- zip xs [0..n], x == x']
+                 where n = length xs - 1
+
+> positions 0 [1,0,0,1,0,1,1,0]
+[1,2,4,7]
+
+this can be useful as unlike arrays, lists do not have indexes.
+
+String Comprehensions
+---------------------
+
+"abc" :: String
+['a','b','c'] :: [Char]
+
+Because strings are just special kinds of lists, any polymorphic function that
+operates on lists can also be applied to strings:
+
+> length "abcde"
+5
+
+> take 3 "abcde"
+"abc"
+
+> zip "abc" [1,2,3,4]
+[('a',1),('b',2),('c',3)]
+
+List comprehensions can also be used to define functions on strings, such as a
+function that counts the lower-case letters in a string:
+
+lowers :: String -> Int
+
+lowers xs = length [x | x <- xs, isLower x]
+
+> lowers "Haskell"
+6
