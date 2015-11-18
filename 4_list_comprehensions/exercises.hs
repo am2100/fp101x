@@ -33,7 +33,14 @@ perfects :: Int -> [Int]
 perfects n = [x | x <- [1..n], sum (init (factors x)) == x]
 -} 
 
+{-
 find :: (Eq a) => a -> [(a,b)] -> [b]
 find key table = [value | (key', value) <- table, key == key']
 
 positions :: (Eq a) => a -> [a] -> [Int]
+-}
+
+import Data.Char
+
+let2int :: Char -> Int
+let2int c = ord c - ord 'A'
