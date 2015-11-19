@@ -87,7 +87,7 @@ let2int :: Char -> Int
 let2int c = ord c - ord 'a'
 
 uclet2int :: Char -> Int
-uclet2int c = ord c - ord 'A'
+uclet2int c = ord c - ord 'A'o
 
 int2let :: Int -> Char
 int2let n = chr (ord 'a' + n)
@@ -117,3 +117,14 @@ divisors x = [d | d <- [1..x], d `divides` x]
 
 divides :: Int -> Int -> Bool
 divides x d = x `mod` d == 0
+=======
+find :: (Eq a) => a -> [(a,b)] -> [b]
+find key table = [value | (key', value) <- table, key == key']
+
+positions :: (Eq a) => a -> [a] -> [Int]
+-}
+
+import Data.Char
+
+let2int :: Char -> Int
+let2int c = ord c - ord 'A'
