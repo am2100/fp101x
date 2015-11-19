@@ -1,0 +1,105 @@
+Recursive Functions pt 1
+========================
+
+"tail call elimination" allows for recursive functions, whilst it avoids stack overflows, and is particularly useful for
+control structures.
+
+Functions in Haskell can be defined in terms of other functions
+
+factorial :: Int -> Int
+factorial n = product [1..n]
+
+factorial maps any integer n to the product of the integers between 1 and n.
+
+Following the evaluation of this expression:
+
+factorial 4
+=
+product [1..4]
+=
+product [1,2,3,4]
+=
+1*2*3*4
+=
+24
+
+Recursive functions
+-------------------
+
+Functions can also be defined in terms of themselves. These are recursive
+functions.
+
+factorial 0 = 1
+factorial n = n * factorial (n - 1)
+
+This is very similar to the way you would define recursion over lists.
+
+Following the evaluation of factorial, we get a very stack heavy set of steps:
+
+factorial 3
+=
+3 * factorial 2
+=
+3 * (2 * factorial 1)
+=
+3 * (2 * (1 * 1))
+=
+3 * (2 * 1)
+=
+3 * 2
+=
+6
+
+If n is less than zero however, the recursive definition diverges, because the
+base case is never reached.
+
+> factorial -1
+Exception: stack overflow
+
+Why is recursion useful?
+------------------------
+
+Some functions, such as factorial, are simpler to define in terms of other
+functions.
+
+HOwever, many functions can naturally be defined in terms of themselves.
+
+Properties of functions defined using recursion can be proved using the simple
+but powerful mathematical technique of induction.
+
+Recursion on lists
+------------------
+
+Recursion is not restricted to numbers, but can also be used to define
+functions on lists.
+
+product :: [Int] -> Int
+product [] = 1
+product (n:ns) = n * product ns
+
+This is essentially the same as the recursive factorial function:
+
+product [2,3,4]
+=
+2 * product [3,4]
+=
+2 * (3 * product [4])
+=
+2 * (3 * (4 * product []))
+=
+2 * (3 * (4 * 1)
+=
+2 * (3 * 4)
+=
+2 * 12
+=
+24
+
+Using the same pattern of recursion as in product we can define the length
+function on lists:
+
+length :: [a] -> Int
+length [] = 0
+length (_:xs) = 1 + length xs
+
+Evaluating
