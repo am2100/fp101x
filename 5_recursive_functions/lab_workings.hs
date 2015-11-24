@@ -1,15 +1,11 @@
-toDigits :: Integer -> [Integer]
---
--- return a list of digits
---
--- 1. mod num 10 = digit
--- 2. div num / 10
--- 3. repeat
---
-{-
-toDigits x | x == 0 = []
-           | otherwise = x `mod` 10 : toDigits (x `div` 10)
--}
+-- toDigits
+import Data.Char
 
-toDigits x |  
-  where ys = show x
+toDigits :: Integer -> [Integer]
+toDigits x = stringToDigits (numToString (toInteger x))
+
+numToString :: Integer -> [Char]
+numToString x = show x
+
+stringToDigits :: [Char] -> [Integer]
+stringToDigits xs = [toInteger (ord x - ord '0') | x <- xs]
