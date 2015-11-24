@@ -1,6 +1,6 @@
-
 module Lab2 where
 
+import Data.Char
 ------------------------------------------------------------------------------------------------------------------------------
 -- Lab 2: Validating Credit Card Numbers
 ------------------------------------------------------------------------------------------------------------------------------
@@ -10,14 +10,18 @@ module Lab2 where
 -- ===================================
 
 toDigits :: Integer -> [Integer]
+toDigits x = stringToDigits (numToString (toInteger x))
+
+numToString :: Integer -> [Char]
+numToString x = show x
+
+stringToDigits :: [Char] -> [Integer]
+stringToDigits xs = [toInteger (ord x - ord '0') | x <- xs]
+
 --
--- return a list of digits
+-- Tests
 --
--- 1. convert digits to String
--- 2. convert each Char to Int
---
--- toDigits n = [x | x <- n
-toDigits = undefined
+eval xs = foldl (\x y -> y + (10 * x)) 0 xs
 
 -- ===================================
 -- Ex. 1

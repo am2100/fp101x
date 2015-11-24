@@ -9,3 +9,7 @@ numToString x = show x
 
 stringToDigits :: [Char] -> [Integer]
 stringToDigits xs = [toInteger (ord x - ord '0') | x <- xs]
+
+
+toDigitsRev :: Integer -> [Integer]
+toDigitsRev x = 
