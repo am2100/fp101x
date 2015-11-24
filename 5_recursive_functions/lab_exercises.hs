@@ -59,8 +59,8 @@ breakDigit x | x < 10 = [(x `mod` 10)]
 -- ===================================
 
 isValid :: Integer -> Bool
-isValid = undefined
-
+isValid x | sumDigits (doubleSecond (toDigitsRev x)) `mod` 90 == 0 = True
+          | otherwise = False
 
 -- ===================================
 -- Ex. 5
