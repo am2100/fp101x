@@ -10,7 +10,8 @@ import Data.Char
 -- ===================================
 
 toDigits :: Integer -> [Integer]
-toDigits x = stringToDigits (numToString (toInteger x))
+toDigits x | x >= 0 = stringToDigits (numToString (toInteger x))
+           | otherwise = error "Credit Card numbers aren't negative"
 
 numToString :: Integer -> [Char]
 numToString x = show x
@@ -28,8 +29,7 @@ eval xs = foldl (\x y -> y + (10 * x)) 0 xs
 -- ===================================
 
 toDigitsRev :: Integer -> [Integer]
-toDigitsRev x | x > 0 = (x `mod` 10) : toDigitsRev (x `div` 10) 
-              | otherwise = []
+toDigitsRev x = reverse (toDigits x)
 
 --
 -- Tests
@@ -51,7 +51,8 @@ sumDigits :: [Integer] -> Integer
 sumDigits xs = sum (concat [breakDigit x | x <- xs])
 
 breakDigit :: Integer -> [Integer]
-breakDigit x | x < 10 = [(x `mod` 10)]
+breakDigit x | x < 0 = error "Credit Card numbers aren't negative"
+             | x < 10 = [(x `mod` 10)]
              | otherwise = (x `mod` 10) : breakDigit (x `div` 10)
 
 -- ===================================
