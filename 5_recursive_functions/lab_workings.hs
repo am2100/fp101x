@@ -18,3 +18,10 @@ toDigitsRev x | x > 0 = (x `mod` 10) : toDigitsRev (x `div` 10)
 
 doubleSecond :: [Integer] -> [Integer]
 doubleSecond xs = zipWith ($) (cycle [id, (2*)]) xs 
+
+sumDigits :: [Integer] -> Integer
+sumDigits xs = sum (concat [breakDigit x | x <- xs])
+
+breakDigit :: Integer -> [Integer]
+breakDigit x | x < 10 = [(x `mod` 10)]
+             | otherwise = (x `mod` 10) : breakDigit (x `div` 10)
