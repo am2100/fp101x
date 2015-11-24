@@ -41,7 +41,7 @@ evalRev xs = foldr (\x y -> x + (10 * y)) 0 xs
 -- ===================================
 
 doubleSecond :: [Integer] -> [Integer]
-doubleSecond = undefined
+doubleSecond xs = zipWith ($) (cycle [id, (2*)]) xs 
 
 -- ===================================
 -- Ex. 3

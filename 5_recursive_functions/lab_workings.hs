@@ -16,3 +16,5 @@ toDigitsRev x | x > 0 = (x `mod` 10) : toDigitsRev (x `div` 10)
               | otherwise = []
 
 
+doubleSecond :: [Integer] -> [Integer]
+doubleSecond xs = zipWith ($) (cycle [id, (2*)]) xs 
