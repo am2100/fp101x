@@ -28,7 +28,13 @@ eval xs = foldl (\x y -> y + (10 * x)) 0 xs
 -- ===================================
 
 toDigitsRev :: Integer -> [Integer]
-toDigitsRev = undefined
+toDigitsRev x | x > 0 = (x `mod` 10) : toDigitsRev (x `div` 10) 
+              | otherwise = []
+
+--
+-- Tests
+--
+evalRev xs = foldr (\x y -> x + (10 * y)) 0 xs
 
 -- ===================================
 -- Ex. 2

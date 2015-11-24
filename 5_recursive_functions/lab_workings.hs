@@ -12,4 +12,7 @@ stringToDigits xs = [toInteger (ord x - ord '0') | x <- xs]
 
 
 toDigitsRev :: Integer -> [Integer]
-toDigitsRev x = 
+toDigitsRev x | x > 0 = (x `mod` 10) : toDigitsRev (x `div` 10) 
+              | otherwise = []
+
+
