@@ -1,0 +1,180 @@
+Higher Order Functions
+======================
+
+Part 1
+------
+
+A function is called higher-order if it takes a function as an argument or
+returns a function as a result:
+
+twice :: (a -> a) -> a -> a
+twice f x = f (f x)
+
+Twice is a higher-order function because it takes a function as an argument.
+
+The parentheses are mandatory here and indicate that the first parameter is a
+function that takes one parameter and returns a value of the same type.
+
+The second parameter is something of type a, and the return value's type is
+also a. It doesn't matter what the parameters are, but they must all be of the
+same type.
+
+The body of the function applies x to the function, and then applies the
+function to the result.
+
+How does it do this?
+It applies f once which takes an a and returns an a.
+The argument to the second application of f is therefore another a.
+Applying f to a for a second time returns a value of type a.
+
+Examples:
+
+twice (+3) 10
+=
+(+3) ((+3) 10)
+=
+(+3) 13
+=
+16
+
+twice (++ " HAHA") "HEY"
+=
+(++ " HAHA") ((++ " HAHA") "HEY")
+=
+(++ " HAHA") "HEY HAHA"
+=
+"HEY HAHA HAHA"
+
+twice (3:) [1]
+=
+(3:) ((3:) [1])
+=
+(3:) [3,1]
+=
+[3,3,1]
+
+If our function requires us to pass in a function that takes only one
+parameter, we can partially apply a function to the point where it only takes
+a single parameter. E.g. the (+) function trakes two parameters, but in the
+example above, it has been partially applied so that it only takes one
+parameter.
+
+
+
+Why are Higher Order Functions useful?
+--------------------------------------
+Don't Repeat Yourself! Common programming idioms can be encoded as functions
+within the language itself.
+
+Domain specific languages can be defined as collections of higher-order
+functions.
+
+Algebraic properties of higher order functions can be used to reason about
+programs.
+
+The Map Function
+----------------
+
+The higher-order library function called map applies a function to every
+element of a list.
+
+map :: (a -> b) -> [a] -> [b]
+
+> map (+1) [1,3,5,7]
+[2,4,6,8]
+
+The map function can be defined in a particularly simple manner using a list
+comprehension:
+
+map f xs = [f x | x <- xs]
+
+Map can also be defined using recursion. This is preferable for the purposes
+of proofs:
+
+map f [] = []
+map (x:xs) = f x : map f xs
+
+The Filter Function
+-------------------
+
+The higher-order library function filter selects every element from a list
+that satisfies a predicate:
+
+filter :: (a -> Bool) -> [a] -> [a]
+
+> filter even [1..10]
+[2,4,6,8,10]
+
+The filter function can be defined using a list comprehension:
+
+filter p xs = [x | x <- xs, p x]
+
+The recursive definition of filter is very similar to that for map:
+
+filter p [] = []
+filter p (x:xs) | p x = x : filter p xs
+                | otherwise filter p xs
+
+This similar definition structure across different higher-order functions, 
+allows for the extraction of that commonality into an even higher higher-order 
+function.
+
+That higher order function is foldr.
+
+Part 2
+------
+
+foldr folds from the right
+foldl folds from the left
+
+The Foldr Function
+------------------
+
+Nb. (+) is used here to indicate the 'funny plus' operator (a '+' in a circle) rather
+than the addition operator.
+
+Foldr captures the essence of recursing over a list.
+
+A number of functions on lists can be defined using the following simple
+pattern of recursion:
+
+f [] = v
+f (x:xs) = x (+) f xs
+
+f maps the empty list to some value v, and any non-empty list is mapped to
+some function (+) applied to its head and f or its tail.
+
+f traverses a list, replacing the empty list with v, and replacing every
+occurrance of (:) with (+).
+
+f is a homomorphism over a list - it respects the structure of the list.
+
+(In abstract algebra, a homomorphism is a structure-preserving map between two
+algebraic structures (such as groups, rings, or vector spaces).)
+
+For example:
+
+sum [] = 0              -- v   = 0
+sum (x:xs) = x + sum xs -- (+) = +
+
+product []                      -- v   = 1
+product (x:xs) = x * product xs -- (+) = *
+
+and [] = True            -- v   = True
+and (x:xs) = x && and xs -- (+) = &&
+
+The higher-order library function foldr encapsulates this simple pattern of
+recursion, with the function (+) and the value v as arguments.
+
+For example:
+
+sum     = foldr (+) 0
+
+product = foldr (*) 1
+
+or      = foldr (||) False
+
+and     = foldr (&&) True
+
+
+
