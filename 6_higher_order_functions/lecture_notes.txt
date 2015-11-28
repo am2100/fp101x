@@ -176,5 +176,160 @@ or      = foldr (||) False
 
 and     = foldr (&&) True
 
+Defining foldr
+--------------
+
+foldr itself can be defined using recursion:
+
+The first parameter is a function that replaces (:) with f.
+The second parameter is a value to replace the empty list with.
+The third parameter is the list on which to work.
+The result is a value of type b
+
+foldr :: (a -> b -> b) -> b -> [a] -> b
+foldr f v [] = v
+foldr f v (x:xs) = f x (foldr f v xs}
+
+However it is best to think of foldr non-recursively, as simultaneously
+replacing eacy (:) in a list by a given function, and [] by a given value.
+
+Foldr Examples
+--------------
+
+sum [1,2,3]
+=
+foldr (+) 0 [1,2,3]
+=
+foldr (+) 0 (1:(2:(2:[])))
+=
+(1 + (2 + (3 + 0)))
+=
+6
+
+Foldr is very similar to the 'Visitor' pattern. It visits a list and for
+every constructor, it applies the function that was passed into foldr as a
+parameter.
+
+product [1,2,3]
+=
+foldr (*) [1,2,3]
+=
+foldr (*) (1:(2:(3:[])))
+=
+(1 * (2 * (3 * 1)))
+=
+6
+
+Other Foldr Examples
+--------------------
+
+Even though foldr encapsulates a simple pattern of recursion, it can be used
+to define many more functions than might first be expected:
+
+length :: [a] -> Int
+length [] = 0
+length (_:xs) = 1 + length xs
+
+length replaces (:) with \_ n -> 1 + n
+and [] with 0
+
+length [1,2,3]
+=
+length (1:(2:(3:[])))
+=
+1 + (1 + (1 + 0)))
+=
+3
+
+This is equivalent to:
+
+length = foldr (\_ n -> 1 + n) 0
+
+Now for the reverse function:
+
+reverse [] = []
+reverse (x:xs) = reverse xs ++ [x]
+
+reverse [1,2,3]
+=
+reverse (1:(2:(3:[])))
+=
+(([] ++ [3]) ++ [2]) ++ [1]
+=
+[3,2,1]
+
+In this case, the empty list is being replaced with the empty list, and the
+(:) operator is being replaced with (\x xs -> xs ++ [x]). This makes:
+
+reverse = foldr (\x xs -> xs ++ [x]) []
+
+The (++) function has a particularly compact definition using foldr:
+
+(++ ys) = foldr (:) ys
+
+Each (:) is replaced with a (:).
+The empty list is replaced with ys.
+
+Why is foldr useful?
+--------------------
+
+Some recursive functions on lists, such as sum are simpler to define using
+foldr.
+
+Properties of functions defined using foldr can be proved using algebraic
+properties of foldr, such as fusion and the banana split rule.
+
+Advanced program optimisations can be simpler if foldr is used in place of
+explicit recursion.
+
+Part 3
+------
+
+The function composition operation
+----------------------------------
+
+The library function (.) returns the composition of two functions as a single
+function.
+
+(.) :: (b -> c) -> (a -> b) -> (a -> c)
+f . g = \x -> f (g x)
+
+The type signature makes sense when understood in terms of the function
+application:
+
+(.) takes a function f (b -> c) and a function g (a -> b) as parameters.
+Function g (a -> b) is applied first with x, which makes x of type a.
+Function f is applied to the result of g x, which is type b.
+That makes the type definition of f (b -> c)
+The function returned by the composition operator is therefore (a -> c)
+
+For example:
+
+odd :: Int -> Bool
+odd = not . even
+
+This is called pointfree style and it is much less verbose than writing it out
+using lambda expressions:
+
+odd = \x -> not (even x)
+
+It is a good idea from a legibility point of view to use pointfree style
+sparingly! Don't go bananas with it.
+
+More useful higher order functions
+----------------------------------
+
+foldr is preferred over list comprehensions because foldr works for all
+recursive data types, whereas list comprehensions only work for lists.
+
+The library function all decides if every element of a list sataisfies a given
+predicate:
+
+all :: (a -> Bool) -> [a] -> Bool
+all p xs = and [p x | xs]
+
+a nicer definition of this would be:
+
+all = map (p . and) -- not sure about this!
 
 
