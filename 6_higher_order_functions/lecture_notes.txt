@@ -182,8 +182,22 @@ Defining foldr
 foldr itself can be defined using recursion:
 
 The first parameter is a function that replaces (:) with f.
+  If you check the type of the (:) operator in hugs, you will get:
+  
+  > :t (:)
+  (:) :: a -> [a] -> [a]
+
+  In the type definition of foldr however, the function that replaces (:) with
+  f is given as:
+
+  (a -> b -> b)
+
+  If you substitute b for [a], you get the definition for the (:) operator.
+
 The second parameter is a value to replace the empty list with.
+
 The third parameter is the list on which to work.
+
 The result is a value of type b
 
 foldr :: (a -> b -> b) -> b -> [a] -> b
@@ -322,7 +336,7 @@ More useful higher order functions
 foldr is preferred over list comprehensions because foldr works for all
 recursive data types, whereas list comprehensions only work for lists.
 
-The library function all decides if every element of a list sataisfies a given
+The library function all decides if every element of a list satisfies a given
 predicate:
 
 all :: (a -> Bool) -> [a] -> Bool
@@ -331,5 +345,27 @@ all p xs = and [p x | xs]
 a nicer definition of this would be:
 
 all = map (p . and) -- not sure about this!
+
+Dually, the library function any decides if at least one element of a list
+satisfies a predicate.
+
+any :: (a -> Bool) -> [a] -> Bool
+any p xs = or [p x | x <- xs]
+
+The library function takeWhile selects elements from a list while a predicate
+holds of all the elements.
+
+takeWhile :: (a -> Bool) -> [a] -> [a]
+takeWhile p [] = []
+takeWhile p (x:xs) | p x = x : takeWhile xs
+                   | otherwise = []
+
+Dually, the function dropWhile removes elements while a predicate holds of all
+the elements.
+
+dropWhile :: (a -> Bool) -> [a] -> [a]
+dropWhile p [] = []
+dropWhile p (x:xs) | p x = dropWhile p xs
+                   | otherwise = x:xs
 
 
