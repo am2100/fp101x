@@ -3,7 +3,7 @@ doubleEvens :: Integral a => [a] -> [a]
 doubleEvens xs = [(2*) x | x <- xs, even x]
 -}
 
-all' :: (a -> Bool) -> [a] -> Bool)
+all' :: (a -> Bool) -> [a] -> Bool
 
 -- lists are finite
 -- lists are not partial
@@ -25,5 +25,6 @@ all' :: (a -> Bool) -> [a] -> Bool)
 
 -- Experiment with infinite and partial lists to spot differences in the behaviour of each implementation.
 
-
-
+-- all' p xs = and (map p xs) -- works
+-- all' p xs = map p (and xs) -- nope. and requires [Bool]. [a] is more general and should take a list of any type.
+all' p = and . map p -- nope. where's the list?
