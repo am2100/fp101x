@@ -123,15 +123,26 @@ doubleEvens xs = [(2*) x | x <- xs, even x]
 -- uncurry' f = \ (x,y) -> f -- no - infinite type error
 -- uncurry' f = \ x y -> f -- no - infinite type error
 
--- p = predicate
--- h = head
--- t = tail
--- p x == halting condition 
 
 unfold :: (b -> Bool) -> (b -> a) -> (b -> b) -> b -> [a]
 
+-- p = predicate             (b -> Bool)
+-- h = head                  (b -> a)
+-- t = tail                  (b -> b)
+-- x                          b
+--
+-- returns                   [a]
+--
+-- p x = halting condition 
+
 unfold p h t x | p x = []
                | otherwise = h x : unfold p h t (t x)
+
+iterate' :: (a -> a) -> a -> [a]
+iterate' f = unfold (const False) id f -- no - infinite type error
+-- iterate' f = unfold (const False) f f -- no - infinite type error
+-- iterate' f = unfold (const True) id f -- no - infinite type error
+-- iterate' f = unfold (const True) f f -- no - infinite type error
 
 -- int2bin :: Int -> [Bit]
 -- int2bin 0 = []
@@ -153,8 +164,3 @@ unfold p h t x | p x = []
 -- map' f = unfold null (\x -> f (head x)) tail -- this is equivalent
 -- map' f = unfold empty (f . head) tail -- no - no such variable empty
 
-iterate' :: (a -> a) -> a -> a
--- iterate' f = unfold (const False) id f -- no - infinite type error
--- iterate' f = unfold (const False) f f -- no - infinite type error
--- iterate' f = unfold (const True) id f -- no - infinite type error
-iterate' f = unfold (const True) f f -- no - infinite type error
