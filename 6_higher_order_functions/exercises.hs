@@ -57,5 +57,18 @@ any' :: (a -> Bool) -> [a] -> Bool
 -- any' p xs = length (filter p xs) > 0 -- yes
 --
 -- any' p = not . null . dropWhile (not . p) -- yes
-any' p xs = not (null (dropWhile (not . p) xs)) -- This is equivalent
+-- any' p xs = not (null (dropWhile (not . p) xs)) -- This is equivalent
+-- haven't got to the bottom of this one either!!!
+--
+-- any' p = null . filter p
+-- any' p = \xs -> null (filter p xs) -- no - this is just a test for a null list
+--
+-- any' p xs = not (all (\x -> not (p x)) xs) -- yes - given example
+-- any' p = not (all (\x -> not (p x))) -- sad face
+-- any' p = not . all (not . p) -- this is equivalent - happy face :)
+--
+-- any' p xs = foldr (\x acc -> (p x) || acc) False xs -- yes
+-- any' p = foldr (\x acc -> (p x) || acc) False -- this is equivalent
+-- 
+any' p xs = foldr (||) True (map p xs)
 
