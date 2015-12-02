@@ -48,7 +48,7 @@ doubleEvens xs = [(2*) x | x <- xs, even x]
 -- all' p = foldr (&&) True . map p -- yes
 -- all' p = (\xs -> foldr (&&) True (map p xs)) 
 
-any' :: (a -> Bool) -> [a] -> Bool
+-- any' :: (a -> Bool) -> [a] -> Bool
 
 -- any' p = map p . or -- no - Type error
 -- any' p = or . map p -- yes
@@ -70,5 +70,91 @@ any' :: (a -> Bool) -> [a] -> Bool
 -- any' p xs = foldr (\x acc -> (p x) || acc) False xs -- yes
 -- any' p = foldr (\x acc -> (p x) || acc) False -- this is equivalent
 -- 
-any' p xs = foldr (||) True (map p xs)
+-- any' p xs = foldr (||) True (map p xs) -- no - always returns true as [] = True
 
+-- takeWhile' :: (a -> Bool) -> [a] -> [a]
+
+-- takeWhile' p = foldl (\acc x -> if p x then x : acc else acc) [] -- no - takes all evens from the list
+-- takeWhile' _ [] = []
+-- takeWhile' p (x:xs) | p x = x : takeWhile p xs
+--                    | otherwise = [] -- yes
+--                    
+-- dropWhile' :: (a -> Bool) -> [a] -> [a]
+-- 
+-- propWhile' _ [] = []
+-- dropWhile' p (x:xs) | p x = dropWhile' p xs
+--                    | otherwise = x:xs      -- yes
+--
+-- map' :: (a -> b) -> [a] -> [b]
+-- map' f = foldr (\x xs -> xs ++ [f x]) [] -- no - reverses the list
+-- map' f = foldr (\x xs -> f x ++ xs) [] -- no - unification would give infinite type ???
+-- map' f = foldl (\xs x -> f x : xs) [] -- no - reverses the list
+-- map' f = foldl (\xs x -> xs ++ [f x]) [] -- yes  
+
+-- filter' :: (a -> Bool) -> [a] -> [a]
+-- filter' p = foldl (\xs x -> if p x then x : xs else xs) [] -- no - reverses list
+-- filter' p = foldr (\x xs -> if p x then x : xs else xs) [] -- yes
+-- filter' p = foldr (\x xs -> if p x then xs ++ [x] else xs) [] -- no - referses list
+-- filter' p = foldl (\x xs -> if p x then xs ++ [x] else xs) [] -- no - accumulator should be the first parameter to lambda
+
+-- dec2int' :: [Integer] -> Integer
+-- dec2int' = foldr (\x acc -> 10 * x + acc) 0 -- no - dec2int' [1,2,3] = 60
+-- dec2int' = foldl (\acc y -> acc + 10 * y) 0 -- no - dec2int' [1,2,3] = 60
+-- dec2int' = foldl (\acc y -> 10 * acc + y) 0 -- yes
+-- 10 * 0 + 1 = 1
+-- 10 * 1 + 2 = 12
+-- 10 * 12 + 3 = 123
+
+-- compose :: [a -> a] -> (a -> a)
+-- compose = foldr (.) id
+--
+-- sumsqreven = compose [sum, map (^ 2), filter even]
+-- sumsqreven = compose [map (^ 2), filter even]
+
+-- curry' :: ((a, b) -> c) -> a -> b -> c
+-- curry' f = \ x y -> f x y -- no - infinite type error
+-- curry' f = \ x y -> f -- no - infinite type error
+-- curry' f = \ x y -> f (x,y) -- yes 
+-- curry' f = \ (x, y) -> f x y -- no - infinite type error
+
+-- uncurry' :: (a -> b -> c) -> (a, b) -> c
+-- uncurry' f = \ (x,y) -> f x y -- yes
+-- uncurry' f = \ x y -> f (x,y) -- no - infinite type error
+-- uncurry' f = \ (x,y) -> f -- no - infinite type error
+-- uncurry' f = \ x y -> f -- no - infinite type error
+
+-- p = predicate
+-- h = head
+-- t = tail
+-- p x == halting condition 
+
+unfold :: (b -> Bool) -> (b -> a) -> (b -> b) -> b -> [a]
+
+unfold p h t x | p x = []
+               | otherwise = h x : unfold p h t (t x)
+
+-- int2bin :: Int -> [Bit]
+-- int2bin 0 = []
+-- int2bin n = n `mod` 2 : int2bin (n `div` 2)
+
+-- int2bin = unfold (== 0) (`mod` 2) (`div` 2)
+
+-- type Bit = Int
+-- chop8 :: [Bit] -> [[Bit]]
+-- chop8 [] = []
+-- chop8 bits = take 8 bits : chop8 (drop 8 bits)
+
+-- chop8 = unfold null (take 8) (drop 8)
+
+-- map' :: (a -> b) -> [a] -> [b]
+-- map' f = unfold null (f) tail -- no - infinite type error
+-- map' f = unfold null (f (head)) tail -- no - infinite type error
+-- map' f = unfold null (f . head) tail -- yes
+-- map' f = unfold null (\x -> f (head x)) tail -- this is equivalent
+-- map' f = unfold empty (f . head) tail -- no - no such variable empty
+
+iterate' :: (a -> a) -> a -> a
+-- iterate' f = unfold (const False) id f -- no - infinite type error
+-- iterate' f = unfold (const False) f f -- no - infinite type error
+-- iterate' f = unfold (const True) id f -- no - infinite type error
+iterate' f = unfold (const True) f f -- no - infinite type error
