@@ -9,7 +9,7 @@ module Lab3 where
 -- ===================================
 
 evens :: [Integer] -> [Integer]
-evens = undefined
+evens = [x | x <- xs, even x]
 
 -- ===================================
 -- Ex. 3 - 4 
