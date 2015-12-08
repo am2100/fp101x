@@ -1,0 +1,96 @@
+Functional Parsers and Monads
+=============================
+
+Part 1
+------
+
+A parser is a program that analyses a piece of text to determine its syntactic
+structure.
+
+2*3+4
+
+=
+
+  +
+ / \
+ * 4
+/ \
+2 3
+
+Basic Parsers
+-------------
+
+Parser type
+-----------
+The Parser type is a monad, a mathematical structure that has proved useful
+for modeling many different kinds of computations.
+
+There is nothing really special about monads. They are just types that have
+certain operations on them. Don't make a big deal of it!
+
+type Parser a = String -> [(a, String)]
+
+item
+----
+The simplest parser we can imagine is:
+
+item :: Parser Char
+item = \inp -> case inp of
+                 [] -> []
+                 (x:xs) -> [(x, xs)]
+
+The parser item fails if the input is empty, and otherwise consumes
+the first character.
+
+failure
+-------
+The failure parser always fails:
+
+failure :: Parser a
+failure = \inp -> []
+
+return
+------
+The return v parser always succeeds, returning the value v without consuming 
+any input:
+
+return :: a -> Parser a
+return v = \inp -> [(v, inp)]
+
+This function is called return because of its relationship to Monads. More
+later...
+
+p +++ q
+-------
+How do we take two parsers and combine the results?
+
+We want to try the first parser, and if it succeeds, we are done. Otherwise we
+want to try the other parser.
+
+The p +++ q behaves as the parser of p if it succeeds, and as the parser q
+otherwise:
+
+(+++) :: Parser a -> Parser a -> Parser a
+p +++ q = \inp -> case p inp of 
+                    [] -> parse q inp
+                    [(v, out)] -> [(v, out)]
+
+The parse function
+------------------
+The parse function applies a parser to a string:
+
+parse :: Parse a -> String -> [(a, String)]
+parse p inp = p inp
+
+Examples
+--------
+
+Attempt to parse an item, but if that fails, return 'd':
+
+> parse (item +++ return 'd') "abc"
+[('a',"bc")]
+
+> parse (failure +++ return 'd') "abc"
+[('d', "abc")]
+
+
