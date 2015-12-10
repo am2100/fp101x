@@ -93,4 +93,259 @@ Attempt to parse an item, but if that fails, return 'd':
 > parse (failure +++ return 'd') "abc"
 [('d', "abc")]
 
+Part 2
+------
+
+Sequencing
+----------
+A sequence of parsers can be combined as a single composite parser using the
+keyword do. 
+
+The do syntax allows sequential composition in the context of a monad. The do
+notation is not specific to the Parser type, but can be used with any monadic
+type.
+
+THE REAL ADVANTAGE OF MONADS IS THAT YOU CAN USE THE DO NOTATION. THAT'S ALL
+THERE IS TO IT.
+
+The sequence will execute one parser, and then when it terminates, execute the
+second parser.
+
+p :: Parser (Char, Char)
+p = do x <- item         -- Try to parse an item and call that x.
+       item              -- Parse another item that we don't need to remember.
+       y <- item         -- Parse a third item and call that y.
+       return (x,y)      -- Return the pair of x,y
+
+We are sequencing three parses of items and returning the first and third.
+
+Nb:
+* Each parser must begin in precisely the same column. The layout rule
+  applies here.
+* The values returned by intermediate parsers are discarded by default, but if
+  required can be named using the <- operator.
+* The value returned by the last parser is the value returned by the sequence
+  as a whole.
+
+When we are composing multiple parsers in a row, if any of them fails, we want
+the whole sequence to fail. We can always use the +++ operator to start
+another parser.
+
+> parse p "abcdef"   digit
+[('a','c'), "def")]
+
+> parse p "ab"      -- This parser fails because the string parameter is not
+[]                  -- long enough to allow for three parses.
+
+Derived Primitives
+------------------
+Parsing a character that satisfies a predicate.
+
+Assuming we already have the sequential parser p, we can write a function that
+takes a predicate from Char -> Bool and returns a parser for characters.
+
+sat :: (Char -> Bool) -> Parser Char
+sat p = do x <- item
+           if p x then
+              return x
+           else
+              failure
+
+We are looking for a character that satisfies p.
+
+We parse an item that will return x.
+
+If p holds then we immediately return x and we don't change the input.
+
+If p of x does not hold, we have to fail.
+
+digit
+-----
+A parser that checks for a digit:
+
+digit :: Parser Char
+digit = sat isDigit
+
+char
+----
+A parser that checks for a character:
+
+char :: Parser Char
+char x = sat (x ==)
+
+many
+----
+Applying a parser zero or more times:
+
+many :: Parser a -> Parser [a]
+many p = many1 p +++ return []
+
+I use this if I want to find zero or more digits, or if I want to parse an
+identifier, I want to parse a letter followed by zero or more identifiers or
+digits.
+
+many takes a Parser of a and returns a Parser of list of a. many is defined
+>ecursively. many of p tries to parse at least one occurrence of p and if that
+fails, it returns the empty list.
+
+many1
+-----
+Applying a parser one or more times:
+
+many1 :: Parser a -> Parser [a]
+many1 p = do v <- p
+             vs <- many p
+             return (v:vs)
+
+We define many1 in terms of many, so here we have a mutually recursive
+definition.
+
+If I want to parse p one or more times, I try to parse p once and get the
+value v. Then I try to parse p zero or more times. If p does not appear again,
+the many parser returns the empty list.
+
+string
+------
+A function that parses a specific string of characters:
+
+string :: String -> Parser String
+string [] = return []
+string (x:xs) = do char x
+                   string xs
+                   return (x:xs)
+
+Parsing an empty list returns the empty list.
+Parsing the list (x:xs) parses the char x and recursively tries to parse the rest of the string.
+Return the result.
+
+This checks if my string is the prefix of my input.
+
+Examples
+--------
+A parser that consumes a list of one or more digits from a string:
+
+p :: Parser String
+p = do char '['                 -- parse an open brace which we'll discard
+       d <- digit               -- parse a digit
+       ds <- many (do char ','  -- parse many characters, comma
+                      digit)    --                        digit
+       char ']'                 -- parse a closed brace which we'll discard
+       return (d:ds)            -- concatenate the digits together
+
+This is an example of how you take a series of elementary parsers and combine
+them together to make a pretty complicated parser like this.
+
+> parse p "[1,2,3,4]"
+[("1234","")]
+
+> parse p "[1,2,3,4" -- a malformed list will generate an error.
+[]
+
+Part 3
+------
+
+Arithmetic Expressions
+----------------------
+
+Consider a simple form of expressions built up from single digits using the
+operations of addition + and multiplication *, together with parentheses.
+
+We assume that * and + associate to the right, and that * has higher
+precedence than +.
+
+a + b + c
+=
+a + (b + c)
+
+a + b * c
+=
+a + (b * c)
+
+Grammar
+-------
+Formally, the syntax of such expressions is defined by the following context
+free grammar:
+
+expr   -> term '+' expr | term
+
+term   -> factor '*' term | factor
+
+factor -> digit | '(' expr ')'
+
+digit  -> '0' | '1' | ... | '9'
+
+There is an expression, a term and a factor and these three productions are
+used to encode the binding of the expressions.
+
+The recursive form of definition encodes the associativity.
+
+An expression is a term plus an expression or a term.
+
+A term is a factor times a term or factor.
+
+A factor is a digit or a parenthesized expression.
+
+A digit is simply a digit. At this point, the recursion bottoms out.
+
+For reasons of efficiency, it is important to factorise the rules for expr and
+term:
+
+expr -> term ('+' expr | epsilon) -- epsilon denotes the empty string, or the
+                                  -- parser that only recognizes empty input.
+term -> factor ('*'  term | epsilon)
+
+It is now easy to translate the grammar into a parser that evaluates
+expressions, by simply rewriting the grammar rules using the parsing
+primitives:
+
+expr :: Parser Int
+expr = do t <- term
+          do char '+'
+             e <- expr
+             return (t + e)
+          +++ return t
+
+term :: Parser Int
+term = do f <- factor
+          do char '*'
+             t <- term
+             return (f * t)
+          +++ return f
+
+factor :: Parser Int
+factor = do d <- digit
+            return (digitToInt d)
+         +++ do char '('
+                e <- expr
+                char ')'
+                return e
+
+eval
+----
+The evaluator function taks a string and attempts to parse that string as an
+expression. It returns the resulting value.
+
+eval :: String -> Int
+eval xs = fst (head (parse expr xs))
+
+Looking at the expr function again, you can see that we are already evaluating
+the expression as we're parsing it:
+
+1. we parse the '+' operator
+2. we take the term and add the result of parsing the expression.
+3. the result is a parser of Int
+
+We are not even creating a parse tree, but immediately evaluating the
+expression as we parse it.
+
+Returning to eval:
+
+parse expr xs             -- we parse the expression given the input
+head (parse expr xs)      -- this returns either an empty list, or a singleton
+                          -- list. If it returns a singleton list, we take the
+                          -- head.
+fst (head (parse expr xs) -- We take the first element, which was the number
+                          -- and then there's the rest of the string. If this 
+                          -- fails to parse the head will throw an error and 
+                          -- the whole thing will fail.
 
