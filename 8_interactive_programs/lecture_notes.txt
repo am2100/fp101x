@@ -1,0 +1,55 @@
+Interactive Programs
+====================
+
+Part 1
+------
+
+The IO monad provides input & output ports for Haskell.
+
+We want to write programs that take inputs from the external world, do
+something with them and then produce outputs to the screen.
+
+In fact we want to be able to produce output at the same time that our program
+continues to receive new input.
+
+Our program needs to interact with both the keyboard and the screen.
+
+If we look at our program as a function, we can see it has become dependant
+upon the keyboard and will need to communicate with the screen in addition to
+producting output.
+
+The problem
+-----------
+
+Haskell programs are pure functions, meaning they cannot have side effects. A
+mathematical function is a function that will always return the same output
+for a given input.
+
+In contrast, a function such as ReadLine takes no argument (or the empty tuple)
+and returns a string. Calling ReadLine again with the same arguments, the same
+empty tuple, will however return a different string. So ReadLine is not a
+mathematical function because it returns side-effects.
+
+We know from its type that Readline will return a String, but what is not
+apparent in the type is that the function will cause side effects.
+
+This is what the IO monad expresses in the type of a function - namely that it
+has a side-effect.
+
+Interactive programs that interact with the outside world have side effects,
+and we need a way to incorporate side effects into Haskell programs.
+
+It is important to understand that side effects are not bad. In fact they are
+super-useful as without them it is really hard to write interactive programs.
+However, it's a question of balance and taste how much you make use of them.
+
+The solution
+------------
+The solution is to introduce a new type.
+
+Interactive programs can be written in Haskell by using types to distinguish
+pure expressions from impure actions that may involve side efects.
+
+IO a -- The type of actions that return a value of type a
+
+
