@@ -1,4 +1,4 @@
-#! usr/local/bin/runhugs +l
+#! usr/bin/runhugs +l
 
 > module Main where
 
