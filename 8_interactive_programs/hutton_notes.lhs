@@ -37,3 +37,55 @@ Char -> IO Int
 which is an abbreviation of the curried function type:
 
 Char -> World -> (Int, World)
+
+the definition of which would look like:
+
+f c = \world -> (c, world)
+
+Basic actions
+-------------
+
+getChar :: IO Char -- reads a character from the keyboard and echoes it to the screen.
+getChar = ...      -- cannot be defined in Haskell, but is built in to Hugs.
+
+putChar :: IO ()   -- writes a character to the screen and returns no result value.
+putChar c = ...
+
+return :: a -> IO a -- creates an IO action that always yields a desired result.
+return v = \world -> (v, world)
+
+Sequencing
+----------
+
+One action can be executed in sequence after another with the (>>=) 'then' operator. In this way, the modified world returned by the first action is used as the current world for the second action.
+
+(>>=) :: IO a -> (a -> IO b) -> IO b
+f >>= g = \world -> case f world of
+                         (v, world') -> g v world'
+
+1. Apply action f to the current world
+2. Apply function g to the result, producing a second action
+3. Apply second action to modified world
+
+As with parsers however, do notation expresses actions defined by (>>=) in a more readable form:
+
+For example, using the do notation the primitive getChar could be dcomposed into the actions of reading a character from the keyboard, echoing it to the screen, and returning the character as the result:
+
+> module IOExtensions where
+>   readBinaryFile     :: FilePath -> IO String
+>   writeBinaryFile    :: FilePath -> String -> IO ()
+>   appendBinaryFile   :: FilePath -> String -> IO ()
+>   openBinaryFile     :: FilePath -> IOMode -> IO Handle
+
+>   getCh              :: IO Char
+>   argv               :: [String]
+
+> getChar :: IO Char
+> getChar = do 
+>            x <- getCh
+>            putChar x
+>            return x
+
+The action getCh reads a character without echoing it to the screen. This is not included in the standard Prelude, but is provided as an extension to Hugs. It can be made available in any script by including the filliwing special line:
+
+primitive getCh :: IO Char
