@@ -16,7 +16,7 @@ Our program needs to interact with both the keyboard and the screen.
 
 If we look at our program as a function, we can see it has become dependant
 upon the keyboard and will need to communicate with the screen in addition to
-producting output.
+producing output.
 
 The problem
 -----------
@@ -51,5 +51,135 @@ Interactive programs can be written in Haskell by using types to distinguish
 pure expressions from impure actions that may involve side efects.
 
 IO a -- The type of actions that return a value of type a
+
+IO Char -- The type of actions that return a value of type Char
+
+IO () -- The type of actions that only produce side effects and return nothing
+
+() is the empty tuple and referred to as unit. It is the equivalent of the
+void keyword in some imperative languages.
+
+Basic actions
+-------------
+The standard library provides a number of actions, including getChar, putChar
+and return.
+
+getChar
+------
+getChar -- reads a character from the keyboard and echoes it to the screen,
+           returning a character as a result value
+
+getChar :: IO Char
+
+putChar
+-------
+putChar c -- writes the character c to the screen and returns no result value.
+
+putChar :: Char -> IO ()
+
+return
+------
+Just like for parsers, the return action immediately returns without doing
+anything. It takes a value and immediately returns that value without
+performing any further side effects.
+
+return :: a -> IO a
+
+Sequencing
+----------
+A sequence of actions can be combined as a single comosite action using the
+keyword do:
+
+a :: IO (Char, Char)
+
+a = do x <- getChar
+       getChar
+       y <- getChar
+       return (x,y)
+
+In this example, three characters are read from StdIn, and the first and third
+are bound to variables and returned in a tuple.
+
+Derived primitives
+------------------
+
+getLine
+-------
+Read a string from the keyboard
+
+getLine :: IO String
+
+getLine = do x <- getChar
+             if x == '\n' then
+               return []
+             else
+               do xs <- getLine
+                  return (x:xs)
+
+getLine is defined in terms of getChar which reads a string from StdIn.
+
+Notice how x has a type of Char, and getChar has a type of IO Char. This is
+why we use the <- operator and not the = operator, because the types on each
+side of the operator are different.
+
+If the character we read in is the '\n', then we are done and return the empty
+list [].
+
+Otherwise we recursively call getLine on the rest of the list.
+
+Finally we return the previously read character and concatenate it onto the
+string that we are recursively writing.
+
+putStr
+------
+Write a string to the screen:
+
+putStr :: String -> IO ()
+
+putStr [] = return ()
+putStr (x:xs) = do putChar x
+                   putStr xs
+
+If we receive an empty string [], we return unit () immediately.
+If we receive a character, we put it to the screen and call putStr recursively
+until the available characters run out.
+
+putStrLn
+--------
+Write a string to the screen and follow it with a new line:
+
+putStrLn :: String -> IO ()
+
+putStrLn xs = do putStr xs
+                 putChar '\n'
+
+Examples
+--------
+The beauty of this is that we can mix and match imperative or IO code with all
+the functions we have previously defined, in particular functions over lists.
+
+So, we can imperatively read a string from StdIn, then use regular list
+functions on that string, and then, imperatively within the IO monad write
+this to the standard output.
+
+We can now define an action that prompts for a string to be entered and
+displays its length:
+
+strlen :: IO ()
+
+strlen = do putStr "Enter a string: "
+            xs <- getLine
+            putStr "The string has "
+            putStr (show (length xs))
+            putStr "characters."
+
+Noticed the island of purity in the sea of impurity! This is a perfect way to
+program. Little parts of pure code embedded in a context of impure code.
+
+Note that this code is only evaluated for the side effects it produces. It
+doesn't return a useful value because it returns only unit ().
+
+Part 2
+------
 
 
