@@ -173,7 +173,7 @@ strlen = do putStr "Enter a string: "
             putStr (show (length xs))
             putStr "characters."
 
-Noticed the island of purity in the sea of impurity! This is a perfect way to
+Notice the island of purity in the sea of impurity! This is a perfect way to
 program. Little parts of pure code embedded in a context of impure code.
 
 Note that this code is only evaluated for the side effects it produces. It
